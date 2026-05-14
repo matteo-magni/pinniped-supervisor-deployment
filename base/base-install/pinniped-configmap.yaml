@@ -1,0 +1,13 @@
+apiGroupSuffix: pinniped.dev
+names:
+  defaultTLSCertificateSecret: pinniped-supervisor-default-tls-certificate
+  apiService: pinniped-supervisor-api
+labels:
+  app: pinniped-supervisor
+tls:
+  onedottwo:
+    allowedCiphers: []
+audit:
+  logUsernamesAndGroups: enabled
+  logInternalPaths: disabled
+aggregatedAPIServerDisableAdmissionPlugins: []

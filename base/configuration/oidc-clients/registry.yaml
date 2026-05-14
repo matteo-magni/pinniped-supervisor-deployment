@@ -1,0 +1,16 @@
+apiVersion: config.supervisor.pinniped.dev/v1alpha1
+kind: OIDCClient
+metadata:
+  name: client.oauth.pinniped.dev-registry
+spec:
+  allowedRedirectURIs: []
+  allowedGrantTypes:
+    - authorization_code
+    - refresh_token
+    - urn:ietf:params:oauth:grant-type:token-exchange
+  allowedScopes:
+    - openid
+    - offline_access
+    - pinniped:request-audience
+    - username
+    - groups

@@ -1,0 +1,34 @@
+resources:
+  - manifests.yaml
+  - service.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  - target:
+      kind: Deployment
+      name: pinniped-supervisor
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: HTTP_PROXY
+          value: proxy.corp.local:8080
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: HTTPS_PROXY
+          value: proxy.corp.local:8080
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: NO_PROXY
+          value: 100.65.128.0/22,100.65.0.0/20,.svc.cluster.local,.cluster.local,10.184.144.0/23,10.184.6.0/26,.corp.local
+
+configMapGenerator:
+  - name: pinniped-supervisor-static-config
+    namespace: pinniped-supervisor
+    behavior: merge
+    files:
+      - pinniped.yaml=pinniped-configmap.yaml

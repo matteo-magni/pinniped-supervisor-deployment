@@ -1,0 +1,4 @@
+resources:
+  - vsphere-supervisor.yaml
+  - registry.yaml
+  - argocd.yaml

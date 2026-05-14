@@ -1,0 +1,16 @@
+resources:
+  - idp-openldap.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+  - name: openldap-bind-account
+    type: kubernetes.io/basic-auth
+    envs:
+      - openldap-bind-account.properties
+
+configMapGenerator:
+  - name: openldap-ca
+    files:
+      - ca=ldap-proxy-ca.crt

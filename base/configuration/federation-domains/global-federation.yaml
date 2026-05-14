@@ -1,0 +1,33 @@
+apiVersion: config.supervisor.pinniped.dev/v1alpha1
+kind: FederationDomain
+metadata:
+  name: global
+  namespace: pinniped-supervisor
+spec:
+  identityProviders:
+    - displayName: Azure EntraID
+      objectRef:
+        apiGroup: idp.supervisor.pinniped.dev
+        kind: OIDCIdentityProvider
+        name: entraid
+    - displayName: OpenLDAP
+      objectRef:
+        apiGroup: idp.supervisor.pinniped.dev
+        kind: LDAPIdentityProvider
+        name: openldap
+      transforms:
+        constants:
+          - name: suffix
+            type: string
+            stringValue: "@ldap"
+        expressions:
+          - type: username/v1
+            expression: 'username + strConst.suffix'
+          - type: groups/v1
+            expression: 'groups.map(group, group + strConst.suffix)'
+        examples:
+          - username: "scrooge"
+            groups: [ "auditor", "developer" ]
+            expects:
+              username: "scrooge@ldap"
+              groups: [ "auditor@ldap", "developer@ldap" ]

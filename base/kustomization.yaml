@@ -1,0 +1,7 @@
+resources:
+  - base-install
+  - configuration
+  - nginx-reverse-proxy
+
+sortOptions:
+  order: fifo

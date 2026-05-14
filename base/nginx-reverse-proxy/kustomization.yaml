@@ -1,0 +1,66 @@
+namespace: pinniped-supervisor
+
+resources:
+  - app.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: nginx-conf
+    files:
+      - files/nginx.conf
+  - name: trusted-cas
+    files:
+      - files/ldap-server-ca.crt
+
+secretGenerator:
+  - name: ldap-proxy-tls
+    type: kubernetes.io/tls
+    files:
+      - tls.crt=files/ldap-proxy.pem
+      - tls.key=files/ldap-proxy-key.pem
+
+patches:
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nginx
+      spec:
+        template:
+          spec:
+            containers:
+            - name: nginx
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                runAsNonRoot: true
+                runAsUser: 1000
+                seccompProfile:
+                  type: RuntimeDefault
+              volumeMounts:
+              - mountPath: /etc/nginx/nginx.conf
+                name: nginx-conf
+                subPath: nginx.conf
+              - mountPath: /etc/ssl/certs/ldap-server-ca.crt
+                name: trusted-cas
+                subPath: ldap-server-ca.crt
+              - mountPath: /etc/ssl/certs/server.crt
+                name: ldap-proxy-tls
+                subPath: tls.crt
+              - mountPath: /etc/ssl/certs/server.key
+                name: ldap-proxy-tls
+                subPath: tls.key
+            volumes:
+              - name: nginx-conf
+                configMap:
+                  name: nginx-conf
+              - name: trusted-cas
+                configMap:
+                  name: trusted-cas
+              - name: ldap-proxy-tls
+                secret:
+                  secretName: ldap-proxy-tls

@@ -1,0 +1,68 @@
+resources:
+  - ../base
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+images:
+  - name: ghcr.io/vmware/pinniped/pinniped-server
+    newName: registry.instance-a.corp.internal/infra/pinniped/pinniped-server
+    newTag: v0.44.0
+  - name: nginxinc/nginx-unprivileged
+    newName: registry.corp.internal/infra/pinniped/nginx-unprivileged
+    newTag: 1.29.5
+
+patches:
+  - target:
+      group: projectcontour.io
+      kind: HTTPProxy
+      name: pinniped
+    patch: |
+      - op: add
+        path: /spec/virtualhost/fqdn
+        value: pinniped.instance-a.corp.internal
+  - target:
+      group: config.supervisor.pinniped.dev
+      kind: FederationDomain
+      name: global
+    patch: |
+      - op: add
+        path: /spec/issuer
+        value: https://pinniped.instance-a.corp.internal
+  - target:
+      group: config.supervisor.pinniped.dev
+      kind: OIDCClient
+      name: client.oauth.pinniped.dev-vsphere-supervisor
+    patch: |
+      - op: add
+        path: /spec/allowedRedirectURIs/-
+        value: https://supervisor-ip/wcp/pinniped/callback
+  - target:
+      group: config.supervisor.pinniped.dev
+      kind: OIDCClient
+      name: client.oauth.pinniped.dev-registry
+    patch: |
+      - op: add
+        path: /spec/allowedRedirectURIs/-
+        value: https://registry.instance-a.corp.internal/c/oidc/callback
+  - target:
+      group: config.supervisor.pinniped.dev
+      kind: OIDCClient
+      name: client.oauth.pinniped.dev-argocd
+    patch: |
+      - op: add
+        path: /spec/allowedRedirectURIs/-
+        value: https://argocd.instance-a.corp.internal/api/dex/callback
+
+secretGenerator:
+  - name: pinniped-supervisor-default-tls-certificate
+    namespace: pinniped-supervisor
+    type: kubernetes.io/tls
+    files:
+      - tls.crt=pinniped.pem
+      - tls.key=pinniped-key.pem
+  - name: entraid-client-secret
+    namespace: pinniped-supervisor
+    type: secrets.pinniped.dev/oidc-client
+    envs:
+      - entraid-client-secret.properties

@@ -1,0 +1,18 @@
+apiVersion: idp.supervisor.pinniped.dev/v1alpha1
+kind: OIDCIdentityProvider
+metadata:
+  name: entraid
+spec:
+  authorizationConfig:
+    additionalAuthorizeParameters: []
+    additionalScopes:
+    - openid
+    - profile
+    - offline_access
+    - email
+  claims:
+    groups: groups
+    username: upn
+  client:
+    secretName: entraid-client-secret
+  issuer: https://login.microsoftonline.com/tenant-id/v2.0

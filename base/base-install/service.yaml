@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pinniped
+  namespace: pinniped-supervisor
+spec:
+  type: ClusterIP
+  selector:
+    app: pinniped-supervisor
+  ports:
+  - protocol: TCP
+    port: 8443
+    targetPort: 8443
+---
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: pinniped
+  namespace: pinniped-supervisor
+spec:
+  virtualhost:
+    tls:
+      secretName: pinniped-supervisor-default-tls-certificate
+  routes:
+  - services:
+    - name: pinniped
+      port: 8443
+      protocol: tls

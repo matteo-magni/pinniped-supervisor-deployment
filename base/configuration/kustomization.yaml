@@ -1,0 +1,6 @@
+resources:
+  - identity-providers
+  - federation-domains
+  - oidc-clients
+
+namespace: pinniped-supervisor
